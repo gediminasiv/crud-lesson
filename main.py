@@ -61,6 +61,78 @@ def login():
 
         return response
 
+@app.route("/profile", methods=["GET"])
+def profile():
+    session_token = request.cookies.get("session_token")
+
+    # get user from the database based on her/his email address
+    user = User.fetch_one(query=["session_token", "==", session_token])
+
+    if user:
+        return render_template("profile.html", user=user)
+    else:
+        return redirect(url_for("index"))
+
+@app.route("/profile/edit", methods=["GET", "POST"])
+def profile_edit():
+    session_token = request.cookies.get("session_token")
+
+    user = User.fetch_one(query=["session_token", "==", session_token])
+
+    if request.method == "GET":
+        if user:
+            return render_template("profile_edit.html", user=user)
+
+        return redirect(url_for("index"))
+    elif request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+
+        User.edit(obj_id=user.id, name=name, email=email)
+
+        return redirect(url_for("profile"))
+
+@app.route("/profile/delete", methods=["GET", "POST"])
+def profile_delete():
+    session_token = request.cookies.get("session_token")
+
+    # get user from the database based on her/his email address
+    user = User.fetch_one(query=["session_token", "==", session_token])
+
+    if request.method == "GET":
+        if user:  # if user is found
+            return render_template("profile_delete.html", user=user)
+
+        return redirect(url_for("index"))
+    elif request.method == "POST":
+        User.delete(obj_id=user.id)
+
+        return redirect(url_for('index'))
+
+@app.route("/users", methods=["GET"])
+def users():
+    session_token = request.cookies.get("session_token")
+
+    # get user from the database based on her/his email address
+    user = User.fetch_one(query=["session_token", "==", session_token])
+
+    users = User.fetch()
+
+    return render_template("users.html", user=user, users=users)
+
+@app.route("/user/<user_id>", methods=["GET"])
+def user(user_id):
+    session_token = request.cookies.get("session_token")
+
+    # get user from the database based on her/his email address
+    user = User.fetch_one(query=["session_token", "==", session_token])
+
+    user_profile = User.get(obj_id=user_id)
+
+    if user:
+        return render_template("user.html", user_profile=user, user=user)
+
+    return redirect(url_for('index'))
 
 @app.route("/result", methods=["POST"])
 def result():
