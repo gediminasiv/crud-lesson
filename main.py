@@ -7,7 +7,6 @@ from models import User
 
 app = Flask(__name__)
 
-
 @app.route("/", methods=["GET"])
 def index():
     session_token = request.cookies.get("session_token")
